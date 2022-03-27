@@ -29,7 +29,7 @@ github_username:  EternalWind
 linkedin_username: yuandong-li-9b473994
 
 # Build settings
-theme: minima
+theme: jekyll-theme-midnight
 plugins:
   - jekyll-feed
 
