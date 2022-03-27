@@ -30,7 +30,7 @@ linkedin_username: yuandong-li-9b473994
 
 # Build settings
 theme: jekyll-athena
-remote_theme: jekyll-athena
+remote_theme: athena
 plugins:
   - jekyll-feed
 
