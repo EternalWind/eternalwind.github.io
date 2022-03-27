@@ -14,14 +14,7 @@ Recently at work we are building a new system to replace an old relic which incl
 # A little details on our batch
 The input data set is divided into thousands of smaller units to leverage the power of distributed computing. This remains unchanged for both the old system and the new one.
 
-```mermaid
-graph LR;
-    Datasource--data unit-->t1(Worker thread 1)
-    Datasource--data unit-->t2(Worker thread 2)
-    Datasource--data unit-->t3(Worker thread 3)
-    Datasource--data unit-->t4(Worker thread 4)
-    Datasource--data unit-->t5(Worker thread 5)
-```
+![batch_details](/assets/2022-03-27-A-case-study-of-Intel-Hyper-Threading-performance-impact-using-Google-Cloud-Dataflow/1.png)
 
 # Our setup
 The old system runs its batches on a proprietary server grid with a fixed amount of on-premise servers but the number of *executors*(a similar term as Google Cloud Dataflow's worker harness thread) it is allowed to use is artificially limited.
@@ -55,40 +48,13 @@ Well, you can find Intel's official explanation [here](https://www.intel.com/con
 
 To my understanding, basically it means a core's processing speed is so fast that there is an ample amount of idle time while it is waiting for instructions to be fetched from memory to registers. To improve efficency, Intel exposes 2 lanes(called execution contexts) connecting to a single physical core, each transferring instructions of a different thread. Hence, while waiting for the next instruction to be fetched to one of the lanes, the physical core can switch to process the instruction of a different thread available on the other lane instead of idling as depicted below. 
 
-```mermaid
-graph LR;
-    i1(Thread 1 inputs)--Lane 1-->Core
-    i2(Thread 2 inputs)--Lane 2-->Core
-
-```
+![hyper-threading-diagram1](/assets/2022-03-27-A-case-study-of-Intel-Hyper-Threading-performance-impact-using-Google-Cloud-Dataflow/2.png)
 
 Of course, it is still only 1 physical core doing 2 tasks instead of 1 phyisical core doing 1 single task or 2 physicial cores doing 2 tasks and the switch timing can hardly be exactly perfect. **Therefore, with Hyper-Threading time spent on individual tasks would be longer but the overall time on both tasks would be shorter, assuming the same amount of physical cores.** According to Intel, the overall throughput improvement could be up to 30%. 
 
 Below example assumes there are 2 instructions to be processed for each thread.
 
-```mermaid
-sequenceDiagram
-    participant Core
-    participant Lane1
-    participant Lane2
-    Core-)Lane1: loads next instruction for thread 1
-    Core-)Lane2: loads next instruction for thread 2
-    Lane1--)Core: 
-    Note over Core: processing instruction for thread 1 starts
-    Lane2--)Core: 
-    Note over Core: processing instruction for thread 1 ends
-    Core-)Lane1: loads next instruction for thread 1
-    Note over Core: processing instruction for thread 2 starts
-    Lane1--)Core: 
-    Note over Core: processing instruction for thread 2 ends
-    Core-)Lane2: loads next instruction for thread 2
-    Note over Core: processing instruction for thread 1 starts
-    Lane2--)Core: 
-    Note over Core: processing instruction for thread 1 ends
-    Note over Core: processing instruction for thread 2 starts
-    Lane1--)Core: 
-    Note over Core: processing instruction for thread 2 ends
-```
+![hyper-threading-diagram2](/assets/2022-03-27-A-case-study-of-Intel-Hyper-Threading-performance-impact-using-Google-Cloud-Dataflow/3.png)
 
 Sigh, again we were wrong to simply compare the processing time for individual data units since two data units were being processed by a single physical core at the same time in the new system. **What actually happening was: the old system took 2.8 minutes to process 1 data unit per core at a time while the new system took 4.9 minutes to process 2 data units per core at a time.** Hyper-Threading did provide an overal improvement of 12.5% on throughput but it is obviously unable to counter the 50% reduction on cores. We were simply expecting new system to take the same amount of time while giving it only half the amount of physical cores! 
 
