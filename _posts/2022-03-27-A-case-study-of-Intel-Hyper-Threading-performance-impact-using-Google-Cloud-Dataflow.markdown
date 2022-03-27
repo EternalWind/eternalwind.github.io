@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "A case study of Intel Hyper-Threading performance impact using Google Cloud Dataflow"
 date:   2022-03-27 13:44:25 +0800
 categories: Tech

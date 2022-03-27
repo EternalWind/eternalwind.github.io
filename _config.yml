@@ -29,9 +29,18 @@ github_username:  EternalWind
 linkedin_username: yuandong-li-9b473994
 
 # Build settings
-theme: jekyll-theme-midnight
+theme: jekyll-athena
+remote_theme: jekyll-athena
 plugins:
   - jekyll-feed
+
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
 
 # Exclude from processing.
 # The following items will not be processed, by default.
