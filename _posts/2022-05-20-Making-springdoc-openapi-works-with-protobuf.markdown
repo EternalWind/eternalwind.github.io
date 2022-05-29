@@ -189,4 +189,4 @@ The sample project for this post can be found at [here](https://github.com/Etern
 Since innogames' package is not available at maven central, you might need to build from source and install his package locally first. You will also need protobuf compiler installed and have its executable, i.e. protoc, accessible from your system PATH.
 
 # More on this...
-You will soon find there are still some minor issues to be tackled with even having applied this solution. You can find out what they are and how to squeeze them out in [my next post](/_posts/2022-05-29-Fixing-the-openapi-schema-for-protobuf-message.markdown)!
+You will soon find there are still some minor issues to be tackled with even having applied this solution. You can find out what they are and how to squeeze them out in [my next post](/tech/2022/05/29/Fixing-the-openapi-schema-for-protobuf-message.html)!
